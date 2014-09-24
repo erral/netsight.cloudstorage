@@ -3,6 +3,7 @@ Celery task definitions for netsight.cloudstorage
 """
 import logging
 from StringIO import StringIO
+from tinys3 import Connection
 
 from boto import elastictranscoder
 from boto.gs.connection import Location
@@ -71,6 +72,7 @@ def upload_to_s3(bucket_name,
     :rtype: tuple
     """
     s3 = S3Connection(aws_key, aws_secret_key)
+    tinys3 = Connection(aws_key, aws_secret_key, tls=True)
     in_bucket = s3.lookup(bucket_name)
     if in_bucket is None:
         logger.warn(
@@ -79,9 +81,7 @@ def upload_to_s3(bucket_name,
         )
         in_bucket = s3.create_bucket(bucket_name, location=Location.EU)
 
-    k = Key(in_bucket)
     dest_filename = '%s-%s' % (field['name'], field['context_uid'])
-    k.key = dest_filename
 
     logger.info('Fetching %s from %s', field['name'], source_url)
 
@@ -95,10 +95,9 @@ def upload_to_s3(bucket_name,
 
     logger.info(
         'Uploading some data to %s with key: %s' %
-        (in_bucket.name, k.key)
+        (in_bucket.name, dest_filename)
     )
-    #TODO: Chunky monkey uploads
-    k.set_contents_from_file(file_data)
+    tinys3.upload(dest_filename, file_data, bucket_name)
 
     logger.info('Upload complete')
     # Returning the params here so they can be used in the callback
