@@ -127,7 +127,7 @@ class CloudStorage(object):
         :type enforce_file_size: bool
         """
 
-        logger.info('enqueue called for %s' % self.context.absolute_url())
+        logger.debug('enqueue called for %s' % self.context.absolute_url())
         in_progress = self._getStorage()['in_progress']
         cloud_available = self._getStorage()['cloud_available']
 
