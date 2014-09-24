@@ -111,7 +111,7 @@ class CloudStorage(object):
 
     def mark_as_cloud_available(self, fieldname):
         storage = self._getStorage()
-        storage['in_progress'].pop(fieldname)
+        storage['in_progress'].pop(fieldname, None)
         storage['cloud_available'][fieldname] = True
         transaction.commit()
 
